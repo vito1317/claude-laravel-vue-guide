@@ -720,29 +720,140 @@ jobs:
 
 ## 🎯 快速開始
 
+### 方法一：使用 Laravel 13 + Vue.js 整合專案
+
 ```bash
-# 建立新專案
+# 1. 建立 Laravel 13 專案
 composer create-project laravel/laravel waf-monitor
 
-# 進入專案目錄
+# 2. 進入專案目錄
 cd waf-monitor
 
-# 安裝依賴
-npm install
+# 3. 安裝 Vue.js 3 和相關依賴
+npm install vue@latest vue-router@latest pinia@latest
+npm install @vitejs/plugin-vue@latest
 
-# 設定環境變數
+# 4. 建立 Vite 配置
+npm install -D vite@latest
+
+# 5. 創建 vite.config.js
+# 在專案根目錄創建以下文件：
+# vite.config.js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import laravel from 'laravel-vite-plugin'
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: ['resources/css/app.css', 'resources/js/app.vue'],
+            refresh: true,
+        }),
+        vue({
+            template: {
+                transformAssetUrls: {
+                    base: null,
+                    includeAbsolute: false,
+                },
+            },
+        }),
+    ],
+    resolve: {
+        alias: {
+            '@': '/resources/js',
+        },
+    },
+})
+
+# 6. 安裝 Inertia.js 和 React adapter (用於 Vue)
+npm install @inertiajs/vue3 @vitejs/plugin-vue
+
+# 7. 設定環境變數
 cp .env.example .env
 php artisan key:generate
 
-# 執行 migrations
+# 8. 執行 migrations
 php artisan migrate
 
-# 啟動開發伺服器
+# 9. 啟動開發伺服器
+# 後端
+php artisan serve --host=0.0.0.0 --port=8000
+
+# 前端 (在另一個終端機)
+npm run dev
+```
+
+### 方法二：將現有的 Vue.js 專案整合到 Laravel 13
+
+```bash
+# 1. 建立 Laravel 13 專案
+composer create-project laravel/laravel waf-monitor
+
+# 2. 進入專案目錄
+cd waf-monitor
+
+# 3. 將 Vue.js 專案複製到 resources/js
+# 如果你的 Vue.js 專案已經存在
+cp -r /path/to/vue-project/* resources/js/
+
+# 4. 安裝依賴
+npm install
+
+# 5. 設定 Vite 配置
+# 在 resources/js/vite.config.js 創建：
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import laravel from 'laravel-vite-plugin'
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: ['resources/css/app.css', 'resources/js/app.vue'],
+            refresh: true,
+        }),
+        vue(),
+    ],
+})
+
+# 6. 設定環境變數
+cp .env.example .env
+php artisan key:generate
+
+# 7. 執行 migrations
+php artisan migrate
+
+# 8. 啟動開發伺服器
+# 後端
+php artisan serve --host=0.0.0.0 --port=8000
+
+# 前端 (在另一個終端機)
+npm run dev
+```
+
+### 啟動專案
+
+```bash
+# 後端伺服器
 php artisan serve
+
+# 前端開發伺服器 (在另一個終端機)
 npm run dev
 
 # 開啟瀏覽器
 open http://localhost:8000
+```
+
+### 生產環境
+
+```bash
+# 編譯前端資源
+npm run build
+
+# 運行測試
+php artisan test
+
+# 啟動生產環境
+php artisan serve --host=0.0.0.0 --port=8000
 ```
 
 ---
