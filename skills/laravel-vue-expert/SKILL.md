@@ -1,11 +1,11 @@
 ---
 name: laravel-vue-expert
-description: Comprehensive guidance for Laravel 13 and Vue.js development following modern best practices. Use when Codex needs to: (1) Create new Laravel controllers, models, or migrations, (2) Design Vue.js components using Composition API, (3) Integrate Laravel backend with Vue frontend, (4) Implement modern API patterns (REST/JSON), or (5) Apply industry-standard coding patterns for Laravel/Vue projects.
+description: "Comprehensive guidance for Laravel 13 and Vue.js development following Hongzhun project standards. Use when Codex needs to: (1) Create new Laravel controllers, models, or migrations, (2) Design Vue.js components using Composition API, (3) Integrate Laravel backend with Vue frontend, (4) Implement modern API patterns, or (5) Apply industry-standard coding patterns for Laravel/Vue projects."
 ---
 
-# Laravel 13 + Vue.js Expert
+# Laravel 13 + Vue.js Expert (Hongzhun Project Edition)
 
-This skill provides specialized knowledge and procedural guidance for building robust, scalable applications using the Laravel 13 and Vue.js stack.
+This skill provides specialized knowledge and procedural guidance for building robust, scalable applications using the Laravel 13 and Vue.js stack, specifically tailored for the Hongzhun Mold Maintenance Project.
 
 ## Core Development Patterns
 
@@ -32,9 +32,13 @@ When working with the frontend, adhere to these standards:
 ## Reference Material
 
 For detailed implementation details, refer to the following:
-- **API Patterns**: See [references/api_patterns.md](references/api_patterns.md) for standard response structures and error handling.
+- **API Patterns**: See [references/hongzhun-api-spec.md](references/hongzhun-api-spec.md) for standard response structures and error handling.
 - **Laravel Best Practices**: See [references/laravel_best_practices.md](references/laravel_best_practices.md) (to be created) for detailed architectural guidance.
 - **Vue Component Standards**: See [references/vue_standards.md](references/vue_standards.md) (to be created) for component structure and naming conventions.
+- **Hongzhun Workflow**: See [references/hongzhun-workflow.md](references/hongzhun-workflow.md) for business logic and state transitions.
+- **Hongzhun Roles**: See [references/hongzhun-roles.md](references/hongzhun-roles.md) for permission matrices.
+- **Hongzhun Data Model**: See [references/hongzhun-data-model.md](references/hongzhun-data-model.md) for schema definitions.
+- **Hongzhun Frontend Standards**: See [references/hongzhun-frontend-standards.md](references/hongzhun-frontend-standards.md) for iPad UI/UX guidelines.
 
 ## Example Workflows
 
