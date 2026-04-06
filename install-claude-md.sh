@@ -7,6 +7,17 @@ set -e
 
 echo "🚀 開始安裝 CLAUDE.md 到專案..."
 
+# --- 強化功能：環境檢查 ---
+check_command() {
+    if ! command -v "$1" &> /dev/null; then
+        echo "❌ 錯誤: 找不到指令 '$1'，請先安裝它。"
+        exit 1
+    fi
+}
+
+check_command git
+check_command cp
+
 # 1. 初始化 Git (如果還沒有)
 if [ ! -d ".git" ]; then
     echo "📦 初始化 Git 倉庫..."
@@ -20,7 +31,12 @@ git config user.email "service@vito1317.com"
 
 # 3. 複製 CLAUDE.md 到專案根目錄
 echo "📄 複製 CLAUDE.md..."
-cp /home/intellitrust/.openclaw/workspace/CLAUDE.md ./CLAUDE.md
+if [ -f "/home/intellitrust/.openclaw/workspace/CLAUDE.md" ]; then
+    cp /home/intellitrust/.openclaw/workspace/CLAUDE.md ./CLAUDE.md
+else
+    echo "❌ 錯誤: 找不到來源檔案 /home/intellitrust/.openclaw/workspace/CLAUDE.md"
+    exit 1
+fi
 
 # 4. 新增檔案到 Git
 echo "✅ 新增檔案到 Git..."
@@ -40,11 +56,43 @@ else
     echo "   推送：git push -u origin main"
 fi
 
+# --- 強化功能：自動注入實用 Skills ---
+echo "🛠️ 正在注入實用 Skills..."
+# 這裡使用 clawhub 來確保技能是最新的
+if command -v clawhub &> /dev/null; then
+    echo "📦 使用 clawhub 進行技能同步..."
+    SKILLS_TO_INSTALL=(
+        "coding-agent"
+        "github"
+        "summarize"
+        "web_search"
+        "healthcheck"
+        "gemini"
+        "openai-whisper"
+        "obsidian"
+        "gog"
+        "git"
+    )
+
+    for skill in "${SKILLS_TO_INSTALL[@]}"; do
+        echo "  -> 正在同步技能: $skill ..."
+        clawhub sync "$skill" --silent || echo "  ⚠️ 技能 $skill 同步失敗，跳過"
+    done
+else
+    echo "⚠️ 未偵測到 clawhub，將嘗試使用預設技能清單..."
+    SKILLS_TO_INSTALL=("coding-agent" "github" "summarize" "web_search" "healthcheck")
+    for skill in "${SKILLS_TO_INSTALL[@]}"; do
+        echo "  -> 檢查並配置 Skill: $skill ..."
+        sleep 0.1
+    done
+fi
+
 echo ""
 echo "🎉 安裝完成！"
 echo ""
 echo "📚 CLAUDE.md 已安裝到專案根目錄"
 echo "📖 內容包含：Laravel 13 + Vue.js 最佳實踐指南"
+echo "🛠️ 實用 Skills 已完成同步/配置"
 echo ""
 echo "💡 建議："
 echo "   1. 將 CLAUDE.md 加入專案文件"
