@@ -1,40 +1,52 @@
-# 鴻準專案：設備維保核心工作流規範 (Workflow State Machine)
+# 🔄 Hongzhun Business Workflow & State Machine
 
-本文件定義了模具維保系統中兩大核心業務流程的狀態轉換邏輯與操作規範。
+This document defines the legal transitions for the two primary business processes in the system.
 
-## 1. 設備保養流程 (Maintenance Workflow)
-適用於週期性（日、週、月、半年、年）的預防性保養任務。
+## 1. Maintenance Workflow (Preventive)
+*Goal: Ensure assets are serviced before failure.*
 
-### 狀態機定義 (State Machine)
+### State Transitions
+| From State | Event/Action | To State | Required Role |
+| :--- | :--- | :--- | :--- |
+| (None) | System/Admin creates plan | **Planned** | Admin/Manager |
+| **Planned** | Assign personnel | **Assigned** | Admin/Manager |
+| **Assigned** | Technician starts task | **In Progress** | Technician |
+| **In Progress** | Technician submits form | **Pending Approval**| Technician |
+| **Pending Approval**| Manager approves | **Completed** | Manager |
+| **Pending Approval**| Manager rejects | **In Progress** | Manager |
 
-| 狀態 (State) | 說明 | 觸發動作 (Trigger) | 允許的操作 (Allowed Actions) | 權限角色 |
-| :--- | :--- | :--- | :--- | :--- |
-| **Planned** | 計畫已生成 | 自動排配或手動建立計畫 | 編輯計畫內容、取消計畫 | 管理員/部門主管 |
-| **Assigned** | 已指派人員 | 完成「人員排配」動作 | 修改指派人員 | 管理員/部門主管 |
-| **In Progress** | 執行中 | 操作員於平板端點擊「開始保養」 | 填寫保養項目、上傳照片 | 一般操作員/維修人員 |
-| **Pending Approval** | 待簽核 | 提交保養單據 | 查看內容、退回修改 | 部門主管 |
-| **Completed** | 已結案 | 主管審核通過 | 查看歷史記錄、匯出報表 | 所有角色 (Read-only) |
-
-### 執行頻率與角色對應
-- **Level 1 (日常/週)**: 由 **一般操作員** 執行。重點在於異常發現與即時紀錄。
-- **Level 2/3 (月/半年/年)**: 由 **維修人員** 執行。涉及拆解、易損件更換與深度檢查。
+### Business Rules
+- **Rule M-1**: A plan cannot be `Assigned` without a `technician_id`.
+- **Rule M-2**: `In Progress` tasks must include a timestamp of start and end.
+- **Rule M-3**: Transition to `Completed` requires a digital signature/approval from the `Manager`.
 
 ---
 
-## 2. 設備維修流程 (Repair Workflow)
-適用於突發性設備故障、報修或修模需求。
+## 2. Repair Workflow (Reactive)
+*Goal: Resolve unexpected equipment failures.*
 
-### 狀態機定義 (State Machine)
+### State Transitions
+| From State | Event/Action | To State | Required Role |
+| :--- | :--- | :--- | :--- |
+| (None) | Operator submits request | **Requested** | Operator |
+| **Requested** | Manager approves request | **Under Review** | Manager |
+| **Under Review** | Technician accepts/starts | **Repairing** | Technician |
+| **Repairing** | Technician submits resolution| **Pending Satisfaction**| Technician |
+| **Pending Satisfaction**| Operator submits feedback | **Pending Archiving**| Operator |
+| **Pending Archiving**| Manager finalizes | **Closed** | Manager |
 
-| 狀態 (State) | 說明 | 觸發動作 (Trigger) | 允許的操作 (Allowed Actions) | 權限角色 |
-| :--- | :--- | :--- | :--- | :--- |
-| **Requested** | 報修申請中 | 操作員提交「設備叫修申請」 | 修改申請內容 | 一般操作員 |
-| **Under Review** | 審核中 | 主管收到通知進行初步審核 | 核准申請、駁回申請 | 現場主管/部門主管 |
-| **Repairing** | 維修中 | 維修人員接單並開始作業 | 填寫維修內容、更換零件紀錄 | 維修人員 |
-| **Pending Satisfaction** | 待滿意度回饋 | 維修完成，系統通知用戶 | 填寫滿意度評分與意見 | 一般操作員 |
-| **Pending Archiving** | 待歸檔 | 流程完成，等待最後審核 | 檢視維修紀錄 | 部門主管 |
-| **Closed** | 已結案 | 歸檔審核通過 | 查看歷史紀錄 | 所有角色 |
+### Business Rules
+- **Rule R-1**: A repair request MUST be linked to an active `mold_id`.
+- **Rule R-2**: Transition to `Repairing` requires an inspection of the fault by a `Technician`.
+- **Rule R-3**: The workflow cannot reach `Closed` until the `satisfaction_score` (1-5) is recorded.
 
-### 關鍵業務邏輯
-- **維修單關聯性**：每一筆維修單必須關聯一個有效的  與 。
-- **滿意度強制性**：維修流程若未完成「用戶滿意度填寫」，則狀態不得進入 。
+## 3. Role-to-Action Mapping Matrix
+
+| Action | Operator | Technician | Manager | Admin |
+| :--- | :---: | :---: | :---: | :---: |
+| Create Maintenance Plan | ❌ | ❌ | ✅ | ✅ |
+| Execute Daily Maintenance | ✅ | ✅ | ❌ | ❌ |
+| Create Repair Request | ✅ | ❌ | ❌ | ❌ |
+| Approve Repair Request | ❌ | ❌ | ✅ | ✅ |
+| Complete Repair Task | ❌ | ✅ | ❌ | ❌ |
+| Full System Config | ❌ | ❌ | ❌ | ✅ |

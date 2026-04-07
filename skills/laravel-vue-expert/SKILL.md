@@ -1,52 +1,94 @@
 ---
 name: laravel-vue-expert
-description: "Comprehensive guidance for Laravel 13 and Vue.js development following Hongzhun project standards. Use when Codex needs to: (1) Create new Laravel controllers, models, or migrations, (2) Design Vue.js components using Composition API, (3) Integrate Laravel backend with Vue frontend, (4) Implement modern API patterns, or (5) Apply industry-standard coding patterns for Laravel/Vue projects."
+description: "Advanced development engine for Laravel 13 and Vue.js, specifically engineered for the Hongzhun Mold Maintenance Project. This skill provides deep domain expertise, enforcing strict adherence to Hongzhun-specific API standards, database schemas, business workflows, and UI/UX guidelines."
 ---
 
-# Laravel 13 + Vue.js Expert (Hongzhun Project Edition)
+# 🛠️ Laravel 13 + Vue.js Expert (Hongzhun Project Engine)
 
-This skill provides specialized knowledge and procedural guidance for building robust, scalable applications using the Laravel 13 and Vue.js stack, specifically tailored for the Hongzhun Mold Maintenance Project.
+This is not just a reference skill; it is a **Development Engine**. It provides the reasoning logic, standard operating procedures (SOPs), and deep domain knowledge required to build production-ready code for the Hongzhun Mold Maintenance Project.
 
-## Core Development Patterns
+## 🧠 Reasoning & Decision Logic (The "Brain")
 
-### Backend: Laravel 13
-When working with the backend, adhere to these standards:
-- **Architecture**: Use a Service-Repository pattern for complex business logic to keep Controllers thin.
-- **API Design**: Always return `JsonResponse`. Use API Resources for transforming models to JSON.
-- **Validation**: Use Form Request classes for all incoming request validation.
-- **Migrations**: Always write descriptive migration files.
+When a user provides a task, this skill must follow this cognitive process before generating any output:
 
-### Frontend: Vue.js
-When working with the frontend, adhere to these standards:
-- **Composition API**: Always use `<script setup>` and the Composition API.
-- **Component Design**: Keep components small and single-purpose. Use props for data down and emits for events up.
-- **State Management**: Prefer Pinia for global state, but use local `ref`/`reactive` for component-specific state.
-- **Styling**: Follow the project's CSS framework (e.g., Tailwind CSS) consistently.
+1.  **Context Identification**: 
+    - Is the task **Backend (Laravel)**, **Frontend (Vue.js)**, or **Full-Stack**?
+    - Which business domain does it belong to? (Maintenance, Repair, User Management, or Inventory?)
 
-## Integration Guide
+2.  **Requirement Mapping**:
+    - **If Backend**: Consult `references/hongzhun-api-spec.md` (for response format) AND `references/hongzhun-data-model.md` (for schema/types).
+    - **If Frontend**: Consult `references/hongzhun-frontend-standards.md` (for iPad UX) AND `references/vue_standards.md` (for Composition API patterns).
+    - **If Workflow-related**: Consult `references/hongzhun-workflow.md` (for state machine logic) AND `references/hongzhun-roles.md` (for permission logic).
 
-### Connecting Backend to Frontend
-- **Axios/Fetch**: Use a centralized Axios instance configured with the base URL and CSRF token handling.
-- **Data Flow**: Fetch data in `onMounted` or via TanStack Query (if available) and pass it to reactive variables.
+3.  **Constraint Validation**:
+    - Does the proposed solution violate the Hongzhun Service-Repository pattern?
+    - Does the API response include `code`, `message`, and `data`?
+    - Is the Vue component using `<script setup>`?
 
-## Reference Material
+## 📋 Standard Operating Procedures (SOPs)
 
-For detailed implementation details, refer to the following:
-- **API Patterns**: See [references/hongzhun-api-spec.md](references/hongzhun-api-spec.md) for standard response structures and error handling.
-- **Laravel Best Practices**: See [references/laravel_best_practices.md](references/laravel_best_practices.md) (to be created) for detailed architectural guidance.
-- **Vue Component Standards**: See [references/vue_standards.md](references/vue_standards.md) (to be created) for component structure and naming conventions.
-- **Hongzhun Workflow**: See [references/hongzhun-workflow.md](references/hongzhun-workflow.md) for business logic and state transitions.
-- **Hongzhun Roles**: See [references/hongzhun-roles.md](references/hongzhun-roles.md) for permission matrices.
-- **Hongzhun Data Model**: See [references/hongzhun-data-model.md](references/hongzhun-data-model.md) for schema definitions.
-- **Hongzhun Frontend Standards**: See [references/hongzhun-frontend-standards.md](references/hongzhun-frontend-standards.md) for iPad UI/UX guidelines.
+### SOP-01: Creating a New API Resource (Backend)
+**Goal**: Implement a new backend endpoint that adheres to Hongzhun standards.
+1.  **Schema Definition**: Review `references/hongzhun-data-model.md` to identify required fields and types.
+2.  **Model & Migration**: Create/Update the Eloquent model and migration with appropriate constraints.
+3.  **Business Logic**: Implement the logic within a `Service` class (to keep Controllers thin).
+4.  **Data Transformation**: Create a `Resource` class (e.g., `MoldResource`) following the patterns in `references/hongzhun-api-spec.md`.
+5.  **Controller Implementation**:
+    - Use `FormRequest` for validation.
+    - Return `JsonResponse` with the standard structure.
+6.  **Routing**: Register the route in `routes/api.php`.
 
-## Example Workflows
+### SOP-02: Creating a Vue.js Component (Frontend)
+**Goal**: Build a reusable, touch-optimized component for the iPad interface.
+1.  **Component Type**: Determine if it's a `Base` component (stateless) or a `Feature` component (stateful).
+2.  **Structure**: Use `<script setup>` and the Composition API.
+3.  **UX/UI Audit**: Ensure compliance with `references/hongzhun-frontend-standards.md`:
+    - Minimum touch target: 48px.
+    - Use appropriate spacing and high-contrast colors.
+4.  **State Management**: Use `Pinia` for shared state or `ref`/`reactive` for local state.
+5.  **API Integration**: Use the standardized Axios instance for data fetching.
 
-### 1. Creating a New Resource (CRUD)
-1. Generate Migration: `php artisan make:migration create_xxx_table`
-2. Generate Model: `php artisan make:model Xxx`
-3. Generate Controller: `php artisan make:controller XxxController --api`
-4. Create API Resource: `php artisan make:resource XxxResource`
-5. Generate Vue Component: `npm run generate:component Xxx` (if using a generator)
-6. Implement logic in Service/Repository.
-7. Register routes in `routes/api.php`.
+### SOP-03: Implementing a Business Workflow
+**Goal**: Implement a multi-step process (e.g., Repair Request $\rightarrow$ Approval).
+1.  **State Machine Analysis**: Refer to `references/hongzhun-workflow.md` to identify the current state and valid next states.
+2.  **Permission Check**: Refer to `references/hongzhun-roles.md` to ensure the user has the correct role for the requested action.
+3.  **Transition Logic**: Implement the state change in the Service layer, ensuring all side effects (e.g., notifications, logs) are triggered.
+
+## 📚 Reference Knowledge Base
+
+| Category | File Path | Purpose |
+| :--- | :--- | :--- |
+| **API Standards** | `references/hongzhun-api-spec.md` | Response structure, error mapping, and Resource patterns. |
+| **Database Schema** | `references/hongzhun-data-model.md` | Entity definitions, field types, and relations. |
+| **Workflow Logic** | `references/hongzhun-workflow.md` | State machine transitions and business rules. |
+| **Access Control** | `references/hongzhun-roles.md` | RBAC matrix and Laravel Policy guidelines. |
+| **Frontend UX** | `references/hongzhun-frontend-standards.md` | iPad-specific touch targets and UI guidelines. |
+| **Architecture** | `references/laravel_best_practices.md` | Service-Repository and Clean Code patterns. |
+| **Vue Standards** | `references/vue_standards.md` | Composition API and component architecture. |
+
+## 🛠️ Implementation Templates
+
+*When generating code, always lean towards these structures:*
+
+### [Template] Standard API Response (Laravel)
+\`\`\`php
+return response()->json([
+    'code' => 200,
+    'message' => 'Success',
+    'data' => \$transformedData
+], 200);
+\`\`\`
+
+### [Template] Standard Vue Component (Composition API)
+\`\`\`vue
+<script setup>
+import { ref, onMounted } from 'vue';
+// Props, Emits, and Logic here
+</script>
+
+<template>
+  <div class="hongzhun-component">
+    <!-- UI Content -->
+  </div>
+</template>
+\`\`\`

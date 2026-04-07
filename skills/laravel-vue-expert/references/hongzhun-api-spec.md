@@ -1,64 +1,90 @@
-# 鴻準專案：API 響應與錯誤處理規範
+# 📜 Hongzhun API Specification (v1.0)
 
-為確保前端 (Vue.js) 與電子簽核系統能穩定解析，所有 API 必須遵循此標準格式。
+This document defines the mandatory structure for all API communications within the Hongzhun project.
 
-## 1. 標準回應結構 (Standard Response Structure)
+## 1. Global Response Protocol
 
-### 成功回應 (Success)
-所有成功的 API 必須包含  且  欄位包含實際內容。
+All API endpoints **MUST** return a JSON object with a consistent top-level structure.
 
-```json
+### 1.1 Success Response (HTTP 200/201)
+Used for successful GET, POST, PUT, or DELETE operations.
+
+**Structure:**
+- `code` (Integer): A custom application-level status code (e.g., 200 for success).
+- `message` (String): A human-readable description of the result.
+- `data` (Mixed): The payload. For collections, this must be an array or an object containing a list.
+
+**Example (Single Resource):**
+\`\`\`json
 {
   "code": 200,
-  "message": "操作成功",
+  "message": "Mold retrieved successfully",
   "data": {
-    "id": 1024,
-    "mold_name": "模具A-01",
+    "id": 5,
+    "mold_code": "M-001",
     "status": "active"
   }
 }
-```
+\`\`\`
 
-### 錯誤回應 (Error)
-當發生業務錯誤或驗證失敗時，必須回傳對應的 HTTP 狀態碼與錯誤訊息。
+**Example (Collection):**
+\`\`\`json
+{
+  "code": 200,
+  "message": "Molds listed successfully",
+  "data": [
+    { "id": 1, "mold_code": "M-001" },
+    { "id": 2, "mold_code": "M-002" }
+  ]
+}
+\`\`\`
 
-```json
+### 1.2 Error Response (HTTP 4xx/5xx)
+Used for validation errors, authorization failures, or server errors.
+
+**Structure:**
+- `code` (Integer): The HTTP status code or a specific error code.
+- `message` (String): A clear, actionable error message.
+- `errors` (Object, Optional): A key-value map of field-specific validation errors.
+
+**Example (Validation Error - HTTP 422):**
+\`\`\`json
 {
   "code": 422,
-  "message": "驗證失敗",
+  "message": "The given data was invalid.",
   "errors": {
-    "mold_id": ["該欄位為必填"],
-    "quantity": ["數量必須大於 0"]
+    "mold_code": ["The mold code field is required."],
+    "quantity": ["The quantity must be a number."]
   }
 }
-```
+\`\`\`
 
-## 2. 常用 HTTP 狀態碼定義
-
-| 狀態碼 | 意義 | 適用場景 |
-| :--- | :--- | :--- |
-| **200** | OK | 一般查詢或更新成功 |
-| **201** | Created | 新增資源成功 |
-| **400** | Bad Request | 請求格式錯誤 |
-| **401** | Unauthorized | 未登入或 Token 失效 |
-| **403** | Forbidden | 已登入但權限不足 (RBAC 攔截) |
-| **404** | Not Found | 資源不存在 |
-| **422** | Unprocessable Entity | 資料驗證失敗 (Validation Error) |
-| **500** | Internal Server Error | 伺服器內部邏輯錯誤 |
-
-## 3. Laravel API Resource 實作範例
-
-在  中定義轉換邏輯，確保  欄位的一致性。
-
-```php
-// MoldResource.php
-public function toArray(Request $request): array
+**Example (Authorization Error - HTTP 403):**
+\`\`\`json
 {
-    return [
-        'id' => $this->id,
-        'mold_name' => $this->name,
-        'status' => $this->status,
-        'created_at' => $this->created_at->toDateTimeString(),
-    ];
+  "code": 403,
+  "message": "You do not have permission to perform this action."
 }
-```
+\`\`\`
+
+## 2. Data Transformation Rules
+
+To prevent leaking database internals, **never** return raw Eloquent models. Always use **Laravel API Resources**.
+
+### 2.1 Standard Field Mapping
+| Database Field | API Key (CamelCase/SnakeCase) | Type |
+| :--- | :--- | :--- |
+| `id` | `id` | Integer |
+| `mold_code` | `moldCode` | String |
+| `created_at` | `createdAt` | ISO 8601 String |
+
+## 3. HTTP Method Usage
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/molds` | List all molds (supports pagination) |
+| `POST` | `/api/v1/molds` | Create a new mold |
+| `GET` | `/api/v1/molds/{id}` | Retrieve a specific mold |
+| `PUT` | `/api/v1/molds/{id}` | Full update of a mold |
+| `PATCH` | `/api/v1/molds/{id}` | Partial update of a mold |
+| `DELETE` | `/api/v1/molds/{id}` | Soft delete a mold |

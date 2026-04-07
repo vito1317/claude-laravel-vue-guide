@@ -1,36 +1,56 @@
-# 鴻準專案：角色與權限矩陣 (RBAC Specification)
+# 🛡️ Hongzhun RBAC & Permission Specification
 
-本文件定義了系統的權限模型，用於開發 Laravel Middleware 與 Policy 時的邏輯判定。
+This document defines the Role-Based Access Control (RBAC) model for the Hongzhun project.
 
-## 1. 角色定義與權限範圍
+## 1. Role Definitions
 
-| 角色 (Role) | 核心權限描述 | 實作建議 (Laravel Policy) |
+| Role Name | Technical Identifier | Description |
 | :--- | :--- | :--- |
-| **Admin (管理員)** | 擁有系統最高權限，包含所有設定與用戶管理。 |  |
-| **Manager (部門主管)** | 負責計畫審核、報表查看、人員排配與所有流程的最終簽核。 | ,  |
-| **Technician (維修人員)** | 負責執行月/半年/年保養與維修作業，可填寫維修紀錄。 | ,  |
-| **Operator (一般操作員)** | 負責日常/週保養、設備叫修申請與填寫滿意度。 | ,  |
-| **QC (品管)** | 負責驗收維修結果，確保模具品質符合標準。 |  |
+| **Administrator** | `admin` | Full system access. Manages users, settings, and global logs. |
+| **Manager** | `manager` | Departmental authority. Approves plans, repairs, and manages personnel assignments. |
+| **Technician** | `technician` | Field execution. Performs maintenance and repairs. Records technical data. |
+| **Operator** | `operator` | Daily user. Performs routine checks, submits repair requests, and provides feedback. |
+| **QC** | `qc` | Quality control. Verifies repair quality and inspects completed maintenance. |
 
-## 2. 權限實作指南 (Implementation Guide)
+## 2. Permission Matrix (Action-to-Role Mapping)
 
-### Laravel Middleware 策略
-所有 API 請求必須透過  驗證，並根據  欄位進行權限檢查。
+This matrix defines which roles can perform specific actions. Use this to implement Laravel Policies.
 
-### 範例：維修單審核權限 (RepairPolicy.php)
-```php
-public function approve(User , RepairRequest $request)
+| Action | Admin | Manager | Technician | Operator | QC |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `create-maintenance-plan` | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `assign-personnel` | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `execute-maintenance` | ✅ | ❌ | ✅ | ✅ | ❌ |
+| `approve-maintenance` | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `create-repair-request` | ✅ | ❌ | ❌ | ✅ | ❌ |
+| `approve-repair-request` | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `execute-repair` | ✅ | ❌ | ✅ | ❌ | ❌ |
+| `verify-repair-quality` | ✅ | ❌ | ❌ | ❌ | ✅ |
+| `manage-users` | ✅ | ❌ | ❌ | ❌ | ❌ |
+
+## 3. Implementation Strategy (Laravel)
+
+### A. Middleware Approach
+Use a custom `RoleMiddleware` to protect routes based on the user's role stored in the `users.role` column.
+
+\`\`\`php
+// Example: Route protection
+Route::middleware(['auth:sanctum', 'role:manager,admin'])->group(function () {
+    Route::post('/maintenance/plans', [MaintenancePlanController::class, 'store']);
+});
+\`\`\`
+
+### B. Policy Approach (Recommended)
+For fine-grained control (e.g., "Can this user approve *this specific* repair?"), always use Laravel Policies.
+
+\`\`\`php
+// Example: RepairPolicy.php
+public function approve(User \$user, Repair \$repair)
 {
-    // 只有部門主管或現場主管可以審核
-    return in_array(->role, ['manager', 'supervisor']);
+    // Only managers or admins can approve repairs
+    return in_array(\$user->role, ['manager', 'admin']);
 }
-```
+\`\`\`
 
-### 範例：保養計畫建立權限
-```php
-public function create(User )
-{
-    // 只有管理員或部門主管可以建立新的保養計畫
-    return in_array(->role, ['admin', 'manager']);
-}
-```
+### C. Database Design for RBAC
+The `users` table contains a `role` column. For more complex systems, consider a `roles` and `permissions` table, but for the current Hongzhun scope, the `role` column is sufficient.
