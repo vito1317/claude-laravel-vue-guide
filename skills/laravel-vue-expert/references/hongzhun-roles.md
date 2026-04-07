@@ -1,20 +1,36 @@
-# 鴻準專案：角色與權限矩陣 (Permission Matrix)
+# 鴻準專案：角色與權限矩陣 (RBAC Specification)
 
-本文件整合了規格書與流程圖中的角色權限定義。
+本文件定義了系統的權限模型，用於開發 Laravel Middleware 與 Policy 時的邏輯判定。
 
-## 核心角色定義
+## 1. 角色定義與權限範圍
 
-| 角色名稱 | 主要職責 | 關鍵權限 |
+| 角色 (Role) | 核心權限描述 | 實作建議 (Laravel Policy) |
 | :--- | :--- | :--- |
-| **系統管理員 (Admin)** | 系統維護 | 全部權限 (C/R/U/D) |
-| **部門主管 (Manager)** | 審核與管理 | 簽核 (Approve)、查看報表、管理保養計畫 |
-| **維修人員 (Technician)** | 執行維修與定期保養 | 執行維修單、執行月/半年/年保養、回報修模內容 |
-| **一般操作員 (Operator)** | 現場點檢與叫修 | 執行日/週保養、發起設備叫修申請、填寫滿意度 |
-| **品管 (QC)** | 品質檢驗 | 驗收修模結果、品管確認 |
-| **產工 (Production)** | 生產協調 | 參與修模書會簽、查看排配計畫 |
+| **Admin (管理員)** | 擁有系統最高權限，包含所有設定與用戶管理。 |  |
+| **Manager (部門主管)** | 負責計畫審核、報表查看、人員排配與所有流程的最終簽核。 | ,  |
+| **Technician (維修人員)** | 負責執行月/半年/年保養與維修作業，可填寫維修紀錄。 | ,  |
+| **Operator (一般操作員)** | 負責日常/週保養、設備叫修申請與填寫滿意度。 | ,  |
+| **QC (品管)** | 負責驗收維修結果，確保模具品質符合標準。 |  |
 
-## 權限操作符說明
-- **C (Create)**: 建立/新增
-- **R (Read)**: 檢視/讀取
-- **U (Update)**: 編輯/修改
-- **A (Approve/Verify)**: 審核/驗收/確認
+## 2. 權限實作指南 (Implementation Guide)
+
+### Laravel Middleware 策略
+所有 API 請求必須透過  驗證，並根據  欄位進行權限檢查。
+
+### 範例：維修單審核權限 (RepairPolicy.php)
+```php
+public function approve(User , RepairRequest $request)
+{
+    // 只有部門主管或現場主管可以審核
+    return in_array(->role, ['manager', 'supervisor']);
+}
+```
+
+### 範例：保養計畫建立權限
+```php
+public function create(User )
+{
+    // 只有管理員或部門主管可以建立新的保養計畫
+    return in_array(->role, ['admin', 'manager']);
+}
+```
